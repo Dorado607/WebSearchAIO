@@ -3,7 +3,7 @@
 
 import re
 from time import sleep
-from typing import Any
+from typing import Any, Union
 
 from goose3 import Goose
 from goose3.text import StopWordsChinese
@@ -11,7 +11,7 @@ from goose3.text import StopWordsChinese
 from search_engines.config import FAKE_USER_AGENT
 from search_engines.engines import Bing
 
-def web_search(query: str) -> None | list[dict[str, str]] | list[dict] | Any:
+def web_search(query: str) -> Union[None, list[dict[str, str]], list[dict], Any]:
     """
     使用搜索引擎进行搜索，返回搜索结果列表。
 

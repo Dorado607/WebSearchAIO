@@ -3,5 +3,7 @@ fake_useragent==1.2.1
 fastapi==0.103.0
 goose3==3.1.17
 playwright==1.37.0
+# playwright install chromium
+# playwright install-deps
 Requests==2.31.0
 uvicorn==0.23.2

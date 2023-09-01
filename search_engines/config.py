@@ -3,13 +3,11 @@
 
 from os import path as os_path, pardir as os_pardir, name as os_name
 from sys import version_info
+
 from fake_useragent import UserAgent
 
 ## Python version
 PYTHON_VERSION = version_info.major
-
-# Maximum length of web page abstract
-ABSTRACT_MAX_LENGTH = 350
 
 ## Maximum number of pages to search
 SEARCH_ENGINE_RESULTS_PAGES = 1

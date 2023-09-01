@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import asyncio
 import re
 import socket
 
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import HTTPException
 from playwright.async_api import async_playwright
-
-app = FastAPI()
 
 
 def get_local_ip():
@@ -20,12 +19,13 @@ def get_local_ip():
     return None
 
 
-def is_valid_url(url):
+def is_valid_url(url:str) -> bool:
     pattern = r"^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)$"
     return bool(re.match(pattern, url))
 
 
 class PersistentBrowser:
+
     def __init__(self):
         self.browser = None
         self.page = None
@@ -50,20 +50,20 @@ class PersistentBrowser:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.stop()
 
-
-@app.get("/wsaio/get_title")
-async def get_title(request_url: str = Body(..., description="URL")):
-    async with PersistentBrowser() as browser:
+    async def get_raw_html(self, request_url:str) -> str:
         if is_valid_url(request_url):
-            await browser.page.goto(request_url)
-            title = await browser.page.title()
-            return {"title": title}
+            await self.page.goto(request_url)
+            return await self.page.content()
         else:
             raise HTTPException(status_code=400, detail="Invalid URL")
 
 
-if __name__ == "__main__":
-    import uvicorn
+async def get_html(request_url: str):
+    async with PersistentBrowser() as pbrowser:
+        return await pbrowser.get_raw_html(request_url)
 
-    local_ip = get_local_ip()
-    uvicorn.run(app, host='localhost', port=1919)
+
+if __name__ == "__main__":
+    url = 'https://www.bing.com/search?&q=%D0%A7%D0%B8+%D0%B7%D0%BC%D0%B5%D0%BD%D1%88%D1%83%D1%94+%D0%BA%D0%B0%D0%B2%D0%B0+%D0%B7%D0%B0%D0%BF%D0%B0%D0%BB%D0%B5%D0%BD%D0%BD%D1%8F'
+    html = asyncio.run(get_html(url))
+    print(html)
