@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import asyncio
 import re
 import socket
@@ -19,7 +20,7 @@ def get_local_ip():
     return None
 
 
-def is_valid_url(url:str) -> bool:
+def is_valid_url(url: str) -> bool:
     pattern = r"^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)$"
     return bool(re.match(pattern, url))
 
@@ -50,7 +51,7 @@ class PersistentBrowser:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.stop()
 
-    async def get_raw_html(self, request_url:str) -> str:
+    async def get_raw_html(self, request_url: str) -> str:
         if is_valid_url(request_url):
             await self.page.goto(request_url)
             return await self.page.content()
@@ -58,12 +59,12 @@ class PersistentBrowser:
             raise HTTPException(status_code=400, detail="Invalid URL")
 
 
-async def get_html(request_url: str):
-    async with PersistentBrowser() as pbrowser:
-        return await pbrowser.get_raw_html(request_url)
-
-
 if __name__ == "__main__":
+    async def get_html(request_url: str):
+        async with PersistentBrowser() as pbrowser:
+            return await pbrowser.get_raw_html(request_url)
+
+
     url = 'https://www.bing.com/search?&q=%D0%A7%D0%B8+%D0%B7%D0%BC%D0%B5%D0%BD%D1%88%D1%83%D1%94+%D0%BA%D0%B0%D0%B2%D0%B0+%D0%B7%D0%B0%D0%BF%D0%B0%D0%BB%D0%B5%D0%BD%D0%BD%D1%8F'
     html = asyncio.run(get_html(url))
     print(html)

@@ -3,7 +3,7 @@
 
 import requests
 from urllib.parse import quote_plus
-from .config import PYTHON_VERSION
+from config import PYTHON_VERSION
 
 
 def quote_url(url, safe=';/?:@&=+$,#'):

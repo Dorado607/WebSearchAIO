@@ -2,8 +2,9 @@ beautifulsoup4==4.12.2
 fake_useragent==1.2.1
 fastapi==0.103.0
 goose3==3.1.17
+Requests==2.31.0
+uvicorn==0.23.2
+func_timeout==4.3.5
 playwright==1.37.0
 # playwright install chromium
 # playwright install-deps
-Requests==2.31.0
-uvicorn==0.23.2
