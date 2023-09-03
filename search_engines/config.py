@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os import path as os_path, pardir as os_pardir, name as os_name
+from os import path as os_path
 from sys import version_info
 
 from fake_useragent import UserAgent
@@ -21,18 +21,6 @@ TIMEOUT = 10
 ## Fake User-Agent string - Google desn't like the default user-agent
 ua = UserAgent()
 FAKE_USER_AGENT = ua.chrome
-
-## request header
-HEADERS = {
-    "User-Agent": FAKE_USER_AGENT
-}
-
-# full headers
-# "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-# "Content-Type": "text/html;charset=utf-8",
-# "Accept-Encoding": "gzip, deflate, br, zsdch",
-# "Accept-Language": "zh,en;q=0.9",
-# "User-Agent": FAKE_USER_AGENT
 
 ## Proxy server
 PROXY = None

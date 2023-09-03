@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import asyncio
 from random import uniform as random_uniform
 from time import sleep
 
@@ -9,8 +9,8 @@ from bs4 import BeautifulSoup
 from . import config as cfg
 from . import output as out
 from . import utils
-from .http_client import HttpClient
 from .results import SearchResults
+from .persistent_browser import PersistentBrowser
 
 
 class SearchEngine(object):
@@ -19,9 +19,10 @@ class SearchEngine(object):
     def __init__(self, proxy=cfg.PROXY, timeout=cfg.TIMEOUT):
         """
         :param str proxy: optional, a proxy server
-        :param int timeout: optional, the HTTP timeout
+        :param int timeout: optional, the HTTP timeout # not available now
         """
-        self._http_client = HttpClient(timeout, proxy)
+        self._persistent_browser = PersistentBrowser(timeout, proxy)
+        self._persistent_browser.start()
         self._delay = (0.01, 1)
         self._query = ''
         self._filters = []
@@ -33,7 +34,7 @@ class SearchEngine(object):
         self.ignore_duplicate_domains = False
         '''Collects only unique domains.'''
         self.is_banned = False
-        '''Indicates if a ban occured'''
+        '''Indicates if a ban occurred'''
 
     def _selectors(self, element):
         """Returns the appropriate CSS selector."""
@@ -63,11 +64,9 @@ class SearchEngine(object):
         selector = self._selectors('text')
         return self._get_tag_item(tag.select_one(selector), item)
 
-    def _get_page(self, page: str, data=None):
+    async def _get_page(self, page: str):
         """Gets pagination links."""
-        if data:
-            return self._http_client.post(page, data)
-        return self._http_client.get(page)
+        return await self._persistent_browser.get_raw_html(page)
 
     def _get_tag_item(self, tag, item):
         """Returns Tag attributes."""
@@ -126,13 +125,6 @@ class SearchEngine(object):
         out.console(msg, level=out.Level.error)
         return False
 
-    def set_headers(self, headers):
-        """Sets HTTP headers.
-
-        :param headers: dict The headers
-        """
-        self._http_client.session.headers.update(headers)
-
     def set_search_operator(self, operator):
         """Filters search results based on the operator.
         Supported operators: 'url', 'title', 'text', 'host'
@@ -149,7 +141,7 @@ class SearchEngine(object):
             else:
                 self._filters += [operator]
 
-    def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES, result_num=cfg.SEARCH_ENGINE_RESULTS_NUMS):
+    async def search(self, query, pages=cfg.SEARCH_ENGINE_RESULTS_PAGES, result_num=cfg.SEARCH_ENGINE_RESULTS_NUMS):
         """Queries the search engine, goes through the pages and collects the results.
 
         :param query: str The search query
@@ -165,7 +157,8 @@ class SearchEngine(object):
 
         for page in range(1, pages + 1):
             try:
-                response = self._get_page(request['url'], request['data'])
+                response = await self._get_page(request['url'])
+
                 if not self._is_ok(response):
                     break
 

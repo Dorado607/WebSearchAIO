@@ -19,7 +19,6 @@ class HttpClient(object):
         self.session = requests.session()
         self.session.proxies = self._set_proxy(proxy)
         self.session.headers['User-Agent'] = FAKE_USER_AGENT
-        # self.session.headers['Accept-Language'] = 'zh-CN,zh;q=0.8'
         self.goose = Goose({"http_timeout": TIMEOUT, "stopwords_class": StopWordsChinese,"browser_user_agent": FAKE_USER_AGENT})
         self.timeout = timeout
         self.response = namedtuple('response', ['http', 'html'])

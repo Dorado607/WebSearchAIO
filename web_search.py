@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import asyncio
 import re
 from time import sleep
 from typing import Any, Union
@@ -11,7 +11,7 @@ from goose3.text import StopWordsChinese
 from search_engines.config import FAKE_USER_AGENT
 from search_engines.engines import Bing
 
-def web_search(query: str) -> Union[None, list[dict[str, str]], list[dict], Any]:
+async def web_search(query: str) -> Union[None, list[dict[str, str]], list[dict], Any]:
     """
     使用搜索引擎进行搜索，返回搜索结果列表。
 
@@ -41,7 +41,7 @@ def web_search(query: str) -> Union[None, list[dict[str, str]], list[dict], Any]
     engine.ignore_duplicate_urls = True  # 获取唯一的URL
 
     # 执行搜索
-    search_results = engine.search(query)
+    search_results = await engine.search(query)
 
     # 对于每个搜索结果，提取标题和概要内容
     for res in search_results:
@@ -82,5 +82,5 @@ if __name__ == "__main__":
     ]
 
     for q in texts:
-        print(web_search(query=q))
+        print(asyncio.run(web_search(query=q)))
         sleep(3)
