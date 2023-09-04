@@ -120,9 +120,9 @@ class PersistentBrowser(object):
             response = await page.goto(base_url)
             await page.get_by_role("searchbox").fill(query)
             await page.get_by_role("searchbox").press('Enter')
-            await page.wait_for_load_state(state='load', timeout=500)
+            await page.wait_for_load_state(state='domcontentloaded', timeout=500)
             raw_html = await page.content()
-            page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
+            await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
 
             response = self.response(http=response.status, html=raw_html)
             return response

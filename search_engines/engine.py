@@ -23,7 +23,6 @@ class SearchEngine(object):
         :param int timeout: optional, the HTTP timeout # not available now
         """
         self._persistent_browser = PersistentBrowser(timeout, proxy)
-        self.loop = asyncio.get_event_loop()
         self._delay = (0.01, 1)
         self._query = ''
         self._filters = []
