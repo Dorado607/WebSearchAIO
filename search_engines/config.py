@@ -18,10 +18,6 @@ SEARCH_ENGINE_RESULTS_NUMS = 5
 ## HTTP request timeout 
 TIMEOUT = 10
 
-## Fake User-Agent string - Google desn't like the default user-agent
-ua = UserAgent()
-FAKE_USER_AGENT = ua.chrome
-
 ## Proxy server
 PROXY = None
 # PROXY = 'http://127.0.0.1:7890'

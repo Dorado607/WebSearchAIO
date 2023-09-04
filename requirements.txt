@@ -6,5 +6,6 @@ Requests==2.31.0
 uvicorn==0.23.2
 func_timeout==4.3.5
 playwright==1.37.0
+playwright-stealth==1.0.5
 # playwright install chromium
 # playwright install-deps

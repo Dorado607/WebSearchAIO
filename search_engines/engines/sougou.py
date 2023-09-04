@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from fake_useragent import UserAgent
 
-from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from ..config import PROXY, TIMEOUT
 from ..engine import SearchEngine
+
+ua = UserAgent()
+FAKE_USER_AGENT = ua.edge
 
 
 class Sougou(SearchEngine):

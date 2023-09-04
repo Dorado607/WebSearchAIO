@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from ..config import PROXY, TIMEOUT
 from ..engine import SearchEngine
 
 
@@ -28,8 +28,8 @@ class Bing(SearchEngine):
     def _first_page(self):
         """Returns the initial page and query."""
         # self._get_page(self._base_url)
-        url = u'{}/search?&q={}&form=QBLH'.format(self._base_url, self._query)
-        return {'url': url, 'data': None}
+        url = u'{}/search?&q={}&form=QBRE'.format(self._base_url, self._query)
+        return {'url': url, 'data': None, 'base_url':self._base_url, 'query':self._query}
 
     def _next_page(self, tags):
         """Returns the next page URL and post data (if any)"""

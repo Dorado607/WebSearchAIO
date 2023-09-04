@@ -5,11 +5,14 @@ import re
 from time import sleep
 from typing import Any, Union
 
+from fake_useragent import UserAgent
 from goose3 import Goose
 from goose3.text import StopWordsChinese
 
-from search_engines.config import FAKE_USER_AGENT
 from search_engines.engines import Bing
+
+ua = UserAgent()
+FAKE_USER_AGENT = ua.edge
 
 async def web_search(query: str) -> Union[None, list[dict[str, str]], list[dict], Any]:
     """
@@ -24,7 +27,6 @@ async def web_search(query: str) -> Union[None, list[dict[str, str]], list[dict]
     Raises:
         ValueError: 如果搜索引擎API的配置信息未设置，则抛出该异常。
     """
-
     if not query:
         return [
             {
@@ -71,6 +73,7 @@ async def web_search(query: str) -> Union[None, list[dict[str, str]], list[dict]
 
 if __name__ == "__main__":
     texts = [
+        "2杯咖啡",
         "民间借贷利息有什么限制",
         "咖啡，能消炎嗎？",
         "咖啡能消炎吗？黑咖啡有什么功效",
@@ -78,7 +81,6 @@ if __name__ == "__main__":
         "Чи зменшує кава запалення?",
         "コーヒーは炎症を抑えるのか？",
         "Does coffee reduce inflammation?",
-        "2杯咖啡",
     ]
 
     for q in texts:

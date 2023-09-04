@@ -1,6 +1,11 @@
+from fake_useragent import UserAgent
+
 from ..engine import SearchEngine
-from ..config import PROXY, TIMEOUT, FAKE_USER_AGENT
+from ..config import PROXY, TIMEOUT
 from ..utils import unquote_url, quote_url
+
+ua = UserAgent()
+FAKE_USER_AGENT = ua.edge
 
 
 class Duckduckgo(SearchEngine):
