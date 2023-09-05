@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bf691acd-e781-4211-b115-1894971476e2" name="更改" comment="general update">
+      <change afterPath="$PROJECT_DIR$/search_engines/decorator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/search_engines/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/search_engines/engine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/search_engines/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/search_engines/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/search_engines/persistent_browser.py" beforeDir="false" afterPath="$PROJECT_DIR$/search_engines/persistent_browser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web_search.py" beforeDir="false" afterPath="$PROJECT_DIR$/web_search.py" afterDir="false" />
     </list>
@@ -15,8 +17,18 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -30,12 +42,13 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/85352/PythonProjects/WebSearchAIO/search_engines&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/lmq11/Documents/PythonProject/WebSearchAIO/search_engines&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -45,6 +58,9 @@
   }
 }</component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\lmq11\Documents\PythonProject\WebSearchAIO\search_engines" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\85352\PythonProjects\WebSearchAIO\search_engines\libs" />
       <recent name="C:\Users\85352\PythonProjects\WebSearchAIO\search_engines" />
@@ -120,8 +136,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.web_search" />
-        <item itemvalue="Python.engine" />
         <item itemvalue="Python.persistent_browser" />
+        <item itemvalue="Python.engine" />
       </list>
     </recent_temporary>
   </component>
@@ -134,20 +150,45 @@
       <option name="presentableId" value="Default" />
       <updated>1693718172595</updated>
       <workItem from="1693718176368" duration="12397000" />
+      <workItem from="1693877577656" duration="12536000" />
+      <workItem from="1693912802732" duration="3470000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="general update" />
-    <option name="LAST_COMMIT_MESSAGE" value="general update" />
+    <MESSAGE value="general" />
+    <option name="LAST_COMMIT_MESSAGE" value="general" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/search_engines/engine.py</url>
+          <line>159</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/WebSearchAIO$web_search.coverage" NAME="web_search 覆盖结果" MODIFIED="1693844138581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/WebSearchAIO$persistent_browser.coverage" NAME="persistent_browser 覆盖结果" MODIFIED="1693677193250" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/search_engines" />
     <SUITE FILE_PATH="coverage/WebSearchAIO$wsaio_api.coverage" NAME="wsaio_api 覆盖结果" MODIFIED="1693586705543" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/WebSearchAIO$engine.coverage" NAME="engine 覆盖结果" MODIFIED="1693760737985" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/search_engines" />
+    <SUITE FILE_PATH="coverage/WebSearchAIO$web_search.coverage" NAME="web_search 覆盖结果" MODIFIED="1693915137219" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/WebSearchAIO$engine.coverage" NAME="engine 覆盖结果" MODIFIED="1693826862012" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/search_engines" />
+    <SUITE FILE_PATH="coverage/WebSearchAIO$persistent_browser.coverage" NAME="persistent_browser 覆盖结果" MODIFIED="1693901662680" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/search_engines" />
   </component>
 </project>

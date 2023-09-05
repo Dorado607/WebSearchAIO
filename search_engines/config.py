@@ -13,7 +13,7 @@ PYTHON_VERSION = version_info.major
 SEARCH_ENGINE_RESULTS_PAGES = 1
 
 ## Maximum number of results to return
-SEARCH_ENGINE_RESULTS_NUMS = 5
+SEARCH_ENGINE_RESULTS_NUMS = 4
 
 ## HTTP request timeout 
 TIMEOUT = 10

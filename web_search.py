@@ -1,97 +1,84 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import asyncio
-import aiohttp
-import re
 from time import sleep
-from typing import Any, Union
 
+import aiohttp
 from fake_useragent import UserAgent
 from goose3 import Goose
 from goose3.text import StopWordsChinese
-
-from search_engines.engines import Bing
+from fastapi import FastAPI
+from search_engines.engines import *
+from search_engines.decorator import atimer
 
 ua = UserAgent()
-FAKE_USER_AGENT = ua.edge
+FAKE_USER_AGENT = ua.chrome
 
-def web_search(query: str) -> Union[None, list[dict[str, str]], list[dict], Any]:
-    """
-    使用搜索引擎进行搜索，返回搜索结果列表。
 
-    Args:
-        query: 搜索查询字符串。
+class WSAIO:
 
-    Returns:
-        搜索结果列表，每个结果包含"title"、"link"和"snippet"三个字段。
+    def __init__(self):
+        self.loop = None
+        self.engine = Bing()
+        self.goose = Goose({"stopwords_class": StopWordsChinese, "browser_user_agent": FAKE_USER_AGENT})
 
-    Raises:
-        ValueError: 如果搜索引擎API的配置信息未设置，则抛出该异常。
-    """
-    if not query:
-        return [
-            {
-                "snippet": "No input obtained, this may be caused by illegal characters in the question, please try other keywords.",
-                "title": "The search engine is experiencing some glitches",
-                "link": "https://www.bing.com",
-            }
-        ]
-
-    # 异步执行搜索结果处理
-    async def process_search_result(res, session):
+    async def process_search_result(self, res, session):
         try:
-            extend_snippet = goose.extract(url=res["link"])
+            extend_snippet = self.goose.extract(url=res["link"])
             if extend_snippet.title:
                 res["title"] = extend_snippet.title
             if extend_snippet.cleaned_text:
                 abstract = extend_snippet.cleaned_text
-                abstract = re.sub("\n", "", abstract)
+                abstract = abstract.replace("\n", "")
                 res["snippet"] = abstract
             return res
-        except Exception as connect_error:
+        except aiohttp.ClientError as connect_error:
             print(connect_error)
 
-    # 异步搜索执行
-    async def async_search(query):
-        # 创建一个异步请求会话
+    @atimer()
+    # 搜索结果增强
+    async def search_result_enhancement(self, search_results):
         async with aiohttp.ClientSession() as session:
-            # 执行搜索
-            search_results = await engine.search(query)
-
-            # 创建一个任务列表
-            tasks = []
-            for res in search_results:
-                # 将搜索处理的函数加入任务列表
-                tasks.append(process_search_result(res, session))
-
-            # 并发执行所有的搜索处理任务
+            tasks = [self.process_search_result(res, session) for res in search_results]
             return await asyncio.gather(*tasks)
 
-    # 主函数
-    async def main(query: str):
-        return await async_search(query)
+    # 异步搜索
+    async def asearch(self, query: str, enhance:bool = True):
+        search_results = await self.engine.search(query)
+        if enhance:
+            return await self.search_result_enhancement(search_results)
+        return search_results
 
+    def search(self, query: str):
+        """
+        使用搜索引擎进行搜索，返回搜索结果列表。
+        Args: query: 搜索查询字符串。
+        Returns: 搜索结果列表，每个结果包含"title"、"link"和"snippet"三个字段。
+        """
+        if not query:
+            return [{
+                "snippet": "No input obtained, this may be caused by illegal characters in the question, please try other keywords.",
+                "title": "The search engine is experiencing some glitches",
+                "link": "https://www.bing.com",
+            }]
 
-    engine = Bing()
-    goose = Goose({"stopwords_class": StopWordsChinese,"browser_user_agent": FAKE_USER_AGENT})
+        self.engine.ignore_duplicate_urls = True  # 避免重复结果
+        self.loop = asyncio.get_event_loop()
+        search_results = self.loop.run_until_complete(self.asearch(query))
 
-    # 设置Bing搜索引擎的参数
-    engine.ignore_duplicate_urls = True  # 获取唯一的URL
-
-    # 执行主函数
-    search_results = asyncio.run(main(query))
-
-    if not search_results:
-        return [
-            {
+        if not search_results:
+            return [{
                 "snippet": "No web search results obtained, please try other keywords and wait for a while before trying again",
                 "title": "The search engine is experiencing some glitches",
                 "link": "https://www.bing.com",
-            }
-        ]
-    else:
-        return search_results
+            }]
+        else:
+            return search_results
 
+wsaio = WSAIO()
+
+@app.get("/search")
+def search(query: str): return wsaio.search(query)
 
 if __name__ == "__main__":
     texts = [
@@ -105,6 +92,7 @@ if __name__ == "__main__":
         "Does coffee reduce inflammation?",
     ]
 
+    wsaio = WSAIO()
     for q in texts:
-        print(web_search(query=q))
-        sleep(3)
+        print(wsaio.search(query=q))
+        sleep(4)

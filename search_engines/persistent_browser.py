@@ -12,12 +12,14 @@ from playwright.async_api import async_playwright
 from playwright_stealth import stealth_async
 
 from search_engines.config import TIMEOUT, PROXY
+from search_engines.decorator import atimer
 from search_engines.utils import *
 
 ua = UserAgent()
 FAKE_USER_AGENT = ua.edge
 
-def get_local_ip() -> str|None:
+
+def get_local_ip() -> str | None:
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.connect(('8.8.8.8', 80))
@@ -38,14 +40,14 @@ class PersistentBrowser(object):
     def __init__(self, timeout=TIMEOUT, proxy=PROXY):
         script_dir = os.path.dirname(__file__)
         file_path = os.path.join(script_dir, 'libs/stealth.min.js')
+        with open(file_path, 'r') as f:
+            self.js = f.read()
 
         self.browser = None
         self.page = None
         self.timeout = timeout
         self.proxy = self._set_proxy(proxy)
         self.user_Agent = FAKE_USER_AGENT
-        with open(file_path, 'r') as f:
-            self.js = f.read()
         self.response = namedtuple('response', ['http', 'html'])
 
     async def start(self):
@@ -71,7 +73,7 @@ class PersistentBrowser(object):
         await self.stop()
 
     @staticmethod
-    def _set_proxy(proxy:str) -> str|None:
+    def _set_proxy(proxy: str) -> str | None:
         """Returns HTTP or SOCKS proxies dictionary."""
         if proxy is not None:
             if not is_valid_url(proxy):
@@ -87,6 +89,13 @@ class PersistentBrowser(object):
         print(url)
         return url
 
+    # block elements (for some reason makes it slower)
+    async def intercept(self, route):
+        if route.request.resource_type in {'image', 'media', 'font', 'imageset'}:
+            await route.abort()
+        else:
+            await route.continue_()
+
     async def get_raw_html(self, request_url: str) -> namedtuple:
         request_url = self._quote(request_url)
 
@@ -96,34 +105,39 @@ class PersistentBrowser(object):
         if not self.browser:
             raise RuntimeError("Browser context is not initialized")
 
-        context = await self.browser.new_context(user_agent=self.user_Agent, locale='zh-CN')
+        context = await self.browser.new_context(user_agent=FAKE_USER_AGENT, locale='zh-CN')
+
         try:
             page = await context.new_page()
-            # await page.add_init_script(self.js)
             await stealth_async(page)
+            # await page.route('**/*', self.intercept)
+            # await page.add_init_script(self.js)
             response = await page.goto(request_url)
             raw_html = await page.content()
             await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
             return self.response(http=response.status, html=raw_html)
+
         finally:
             await context.close()
 
+    @atimer()
     async def search_main_page(self, base_url: str, query: str) -> namedtuple:
         if not self.browser:
             raise RuntimeError("Browser context is not initialized")
 
-        context = await self.browser.new_context(user_agent=self.user_Agent, locale='zh-CN')
+        context = await self.browser.new_context(user_agent=FAKE_USER_AGENT, locale='zh-CN')
 
         try:
             page = await context.new_page()
-            await page.add_init_script(self.js)
+            await stealth_async(page)
+            # await page.route('**/*', self.intercept)
+            # await page.add_init_script(self.js)
             response = await page.goto(base_url)
             await page.get_by_role("searchbox").fill(query)
             await page.get_by_role("searchbox").press('Enter')
-            await page.wait_for_load_state(state='domcontentloaded', timeout=500)
+            await page.wait_for_load_state(state='domcontentloaded')  # "domcontentloaded", "load", "networkidle"
             raw_html = await page.content()
-            await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
-
+            # await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
             response = self.response(http=response.status, html=raw_html)
             return response
 
@@ -135,6 +149,7 @@ if __name__ == "__main__":
     async def get_html(request_url: str):
         async with PersistentBrowser() as pbrowser:
             return await pbrowser.get_raw_html(request_url)
+
 
     url = 'https://bot.sannysoft.com/'
     html = asyncio.run(get_html(url))
