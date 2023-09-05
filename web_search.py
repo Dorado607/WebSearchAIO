@@ -7,7 +7,6 @@ import aiohttp
 from fake_useragent import UserAgent
 from goose3 import Goose
 from goose3.text import StopWordsChinese
-from fastapi import FastAPI
 from search_engines.engines import *
 from search_engines.decorator import atimer
 
@@ -75,10 +74,6 @@ class WSAIO:
         else:
             return search_results
 
-wsaio = WSAIO()
-
-@app.get("/search")
-def search(query: str): return wsaio.search(query)
 
 if __name__ == "__main__":
     texts = [

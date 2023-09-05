@@ -38,17 +38,13 @@ def is_valid_url(url: str) -> bool:
 class PersistentBrowser(object):
 
     def __init__(self, timeout=TIMEOUT, proxy=PROXY):
-        script_dir = os.path.dirname(__file__)
-        file_path = os.path.join(script_dir, 'libs/stealth.min.js')
-        with open(file_path, 'r') as f:
-            self.js = f.read()
-
         self.browser = None
         self.page = None
         self.timeout = timeout
         self.proxy = self._set_proxy(proxy)
         self.user_Agent = FAKE_USER_AGENT
         self.response = namedtuple('response', ['http', 'html'])
+        self.RESOURCE_EXCLUSTIONS = {'image', 'stylesheet', 'media', 'font', 'other'}
 
     async def start(self):
         if self.browser is None:
@@ -89,9 +85,8 @@ class PersistentBrowser(object):
         print(url)
         return url
 
-    # block elements (for some reason makes it slower)
-    async def intercept(self, route):
-        if route.request.resource_type in {'image', 'media', 'font', 'imageset'}:
+    async def handle_route(self,route):
+        if route.request.resource_type in self.RESOURCE_EXCLUSTIONS:
             await route.abort()
         else:
             await route.continue_()
@@ -110,8 +105,6 @@ class PersistentBrowser(object):
         try:
             page = await context.new_page()
             await stealth_async(page)
-            # await page.route('**/*', self.intercept)
-            # await page.add_init_script(self.js)
             response = await page.goto(request_url)
             raw_html = await page.content()
             await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
@@ -130,8 +123,7 @@ class PersistentBrowser(object):
         try:
             page = await context.new_page()
             await stealth_async(page)
-            # await page.route('**/*', self.intercept)
-            # await page.add_init_script(self.js)
+            await page.route('**/*', self.handle_route)
             response = await page.goto(base_url)
             await page.get_by_role("searchbox").fill(query)
             await page.get_by_role("searchbox").press('Enter')
