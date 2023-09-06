@@ -10,7 +10,7 @@ class Bing(SearchEngine):
 
     def __init__(self, proxy=PROXY, timeout=TIMEOUT):
         super(Bing, self).__init__(proxy, timeout)
-        self._base_url = u'https://www.bing.com'
+        self._base_url = u'https://www.bing.com/?ensearch=1&FORM=BEHPTB&cc=us'
 
     def _selectors(self, element):
         # 'links': 'ol#b_results > li.b_algo', -> 'links': 'li.b_algo',

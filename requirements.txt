@@ -9,4 +9,5 @@ playwright==1.37.0
 playwright-stealth==1.0.5
 aiohttp==3.8.5
 # playwright install chromium
+# playwright install msedge
 # playwright install-deps

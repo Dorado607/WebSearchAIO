@@ -1,18 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+import argparse
 import asyncio
-from time import sleep
+from typing import Any
 
 import aiohttp
+import pydantic
+import uvicorn
 from fake_useragent import UserAgent
+from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 from goose3 import Goose
 from goose3.text import StopWordsChinese
-from fastapi import FastAPI
-from search_engines.engines import *
+from pydantic import BaseModel
+from starlette.responses import RedirectResponse
+
+from search_engines.config import OPEN_CROSS_DOMAIN
 from search_engines.decorator import atimer
+from search_engines.engines import *
 
 ua = UserAgent()
-FAKE_USER_AGENT = ua.chrome
+FAKE_USER_AGENT = ua.edge
 
 
 class WSAIO:
@@ -43,56 +52,113 @@ class WSAIO:
             return await asyncio.gather(*tasks)
 
     # 异步搜索
-    async def asearch(self, query: str, enhance:bool = True):
+    async def asearch(self, query: str, enhance: bool = True):
         search_results = await self.engine.search(query)
         if enhance:
             return await self.search_result_enhancement(search_results)
         return search_results
 
-    def search(self, query: str):
+    async def search(self, query: str = Query(..., description="Query", examples=["string"])):
         """
-        使用搜索引擎进行搜索，返回搜索结果列表。
-        Args: query: 搜索查询字符串。
-        Returns: 搜索结果列表，每个结果包含"title"、"link"和"snippet"三个字段。
+        Use a search engine to perform a search and return a list of search results.
+        Args: query: The search query string.
+        Returns: A list of search results, each containing “title”, “link”, and “snippet” fields.
         """
         if not query:
-            return [{
-                "snippet": "No input obtained, this may be caused by illegal characters in the question, please try other keywords.",
-                "title": "The search engine is experiencing some glitches",
-                "link": "https://www.bing.com",
-            }]
+            return ListResultResponse(
+                data=[{
+                    "snippet": "No input obtained, this may be caused by illegal characters in the question, please try other keywords.",
+                    "title": "The search engine is experiencing some glitches",
+                    "link": "https://www.bing.com",
+                }]
+            )
 
         self.engine.ignore_duplicate_urls = True  # 避免重复结果
-        self.loop = asyncio.get_event_loop()
-        search_results = self.loop.run_until_complete(self.asearch(query))
+        # self.loop = asyncio.get_event_loop()
+        # search_results = self.loop.run_until_complete(self.asearch(query))
+        search_results = await self.asearch(query)
+
 
         if not search_results:
-            return [{
-                "snippet": "No web search results obtained, please try other keywords and wait for a while before trying again",
-                "title": "The search engine is experiencing some glitches",
-                "link": "https://www.bing.com",
-            }]
+            return ListResultResponse(
+                data=[{
+                    "snippet": "No web search results obtained, please try other keywords and wait for a while before trying again",
+                    "title": "The search engine is experiencing some glitches",
+                    "link": "https://www.bing.com",
+                }]
+            )
         else:
-            return search_results
+            return ListResultResponse(
+                data=search_results
+            )
 
+
+class BaseResponse(BaseModel):
+    code: int = pydantic.Field(200, description="HTTP status code")
+    msg: str = pydantic.Field("success", description="HTTP status message")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "code": 200,
+                "msg": "success",
+            }
+        }
+
+
+class ListResultResponse(BaseResponse):
+    data: list[dict[str, Any]] = pydantic.Field(..., description="List of search results")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "code": 200,
+                "msg": "success",
+                "data": [{'host': 'host', 'link': 'url', 'title': 'string', 'snippet': 'string'}],
+            }
+        }
+
+
+async def document():
+    return RedirectResponse(url="/docs")
+
+
+# init fastapi
+app = FastAPI()
+if OPEN_CROSS_DOMAIN:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# init engine
 wsaio = WSAIO()
 
-@app.get("/search")
-def search(query: str): return wsaio.search(query)
+# add route
+app.post('/search', response_model=ListResultResponse, summary='get search results')(wsaio.search)
+app.get("/", response_model=BaseResponse, summary="swagger Document")(document)
+
+
+# launch api
+def api_start(host, port, **kwargs):
+    if kwargs.get("ssl_keyfile") and kwargs.get("ssl_certfile"):
+        uvicorn.run(app, host=host, port=port, ssl_keyfile=kwargs.get("ssl_keyfile"),
+                    ssl_certfile=kwargs.get("ssl_certfile"))
+    else:
+        uvicorn.run(app, host=host, port=port)
+
 
 if __name__ == "__main__":
-    texts = [
-        "2杯咖啡",
-        "民间借贷利息有什么限制",
-        "咖啡，能消炎嗎？",
-        "咖啡能消炎吗？黑咖啡有什么功效",
-        "房子被洪水淹没，房贷未还完，不知是否继续还贷。",
-        "Чи зменшує кава запалення?",
-        "コーヒーは炎症を抑えるのか？",
-        "Does coffee reduce inflammation?",
-    ]
+    parser = argparse.ArgumentParser(description='Web Search Engine All in One')
+    parser.add_argument("--host", type=str, default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=1919)
+    parser.add_argument("--ssl_keyfile", type=str)
+    parser.add_argument("--ssl_certfile", type=str)
 
-    wsaio = WSAIO()
-    for q in texts:
-        print(wsaio.search(query=q))
-        sleep(4)
+    # 初始化消息
+    args = parser.parse_args()
+    args_dict = vars(args)
+    api_start(args.host, args.port, ssl_keyfile=args.ssl_keyfile, ssl_certfile=args.ssl_certfile)

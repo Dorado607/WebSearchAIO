@@ -1,7 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import asyncio
-import os
 import re
 import socket
 from collections import namedtuple
@@ -38,11 +38,6 @@ def is_valid_url(url: str) -> bool:
 class PersistentBrowser(object):
 
     def __init__(self, timeout=TIMEOUT, proxy=PROXY):
-        script_dir = os.path.dirname(__file__)
-        file_path = os.path.join(script_dir, 'libs/stealth.min.js')
-        with open(file_path, 'r') as f:
-            self.js = f.read()
-
         self.browser = None
         self.page = None
         self.timeout = timeout
@@ -55,8 +50,10 @@ class PersistentBrowser(object):
             playwright = await async_playwright().start()
             chromium = playwright.chromium
             self.browser = await chromium.launch(
+                channel='msedge',
+                timeout=self.timeout,
+                headless=True,
                 proxy={'server': self.proxy} if self.proxy else None,
-                headless=True
             )
 
     async def stop(self):
@@ -86,15 +83,14 @@ class PersistentBrowser(object):
         """URL-encodes URLs."""
         if decode_bytes(unquote_url(url)) == decode_bytes(url):
             url = quote_url(url)
-        print(url)
         return url
 
     # block elements (for some reason makes it slower)
     async def intercept(self, route):
-        if route.request.resource_type in {'image', 'media', 'font', 'imageset'}:
-            await route.abort()
+        if route.request.resource_type in {"image", "font", 'media'}:
+            return await route.abort()
         else:
-            await route.continue_()
+            return await route.continue_()
 
     async def get_raw_html(self, request_url: str) -> namedtuple:
         request_url = self._quote(request_url)
@@ -105,16 +101,19 @@ class PersistentBrowser(object):
         if not self.browser:
             raise RuntimeError("Browser context is not initialized")
 
-        context = await self.browser.new_context(user_agent=FAKE_USER_AGENT, locale='zh-CN')
+        context = await self.browser.new_context(
+            screen={'width': 1280, 'height': 720},
+            locale='zh-CN.utf8',
+            user_agent=FAKE_USER_AGENT,
+            extra_http_headers={'Accept': 'text/html, application/xhtml+xml, application/xml;'}
+        )
 
         try:
             page = await context.new_page()
             await stealth_async(page)
-            # await page.route('**/*', self.intercept)
-            # await page.add_init_script(self.js)
             response = await page.goto(request_url)
             raw_html = await page.content()
-            await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
+            # await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
             return self.response(http=response.status, html=raw_html)
 
         finally:
@@ -125,17 +124,22 @@ class PersistentBrowser(object):
         if not self.browser:
             raise RuntimeError("Browser context is not initialized")
 
-        context = await self.browser.new_context(user_agent=FAKE_USER_AGENT, locale='zh-CN')
+        context = await self.browser.new_context(
+            base_url=base_url,
+            screen={'width': 1280, 'height': 720},
+            locale='zh-CN.utf8',
+            user_agent=FAKE_USER_AGENT,
+            extra_http_headers={'Accept': 'text/html, application/xhtml+xml, application/xml;'}
+        )
 
         try:
             page = await context.new_page()
             await stealth_async(page)
-            # await page.route('**/*', self.intercept)
-            # await page.add_init_script(self.js)
             response = await page.goto(base_url)
+            await page.wait_for_load_state(state='load')  # "domcontentloaded", "load", "networkidle"
             await page.get_by_role("searchbox").fill(query)
             await page.get_by_role("searchbox").press('Enter')
-            await page.wait_for_load_state(state='domcontentloaded')  # "domcontentloaded", "load", "networkidle"
+            await page.wait_for_load_state(state='load')  # "domcontentloaded", "load", "networkidle"
             raw_html = await page.content()
             # await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
             response = self.response(http=response.status, html=raw_html)
@@ -150,7 +154,6 @@ if __name__ == "__main__":
         async with PersistentBrowser() as pbrowser:
             return await pbrowser.get_raw_html(request_url)
 
-
     url = 'https://bot.sannysoft.com/'
     html = asyncio.run(get_html(url))
-    print(html)
+    pass

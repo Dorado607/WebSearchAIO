@@ -49,7 +49,6 @@ class HttpClient(object):
         """URL-encodes URLs."""
         if utl.decode_bytes(utl.unquote_url(url)) == utl.decode_bytes(url):
             url = utl.quote_url(url)
-        print(url)
         return url
 
     def _set_proxy(self, proxy):

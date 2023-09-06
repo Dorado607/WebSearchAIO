@@ -154,6 +154,7 @@ class SearchEngine(object):
             try:
                 response = await self._persistent_browser.search_main_page(request['base_url'], request['query'])
                 # response = await self._get_page(request['url'])
+
                 if not self._is_ok(response):
                     break
 
