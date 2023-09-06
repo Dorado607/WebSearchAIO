@@ -52,7 +52,7 @@ class PersistentBrowser(object):
             self.browser = await chromium.launch(
                 channel='msedge',
                 timeout=self.timeout,
-                headless=True,
+                headless=False,
                 proxy={'server': self.proxy} if self.proxy else None,
             )
 
@@ -92,6 +92,7 @@ class PersistentBrowser(object):
         else:
             return await route.continue_()
 
+    @atimer()
     async def get_raw_html(self, request_url: str) -> namedtuple:
         request_url = self._quote(request_url)
 
@@ -105,13 +106,13 @@ class PersistentBrowser(object):
             screen={'width': 1280, 'height': 720},
             locale='zh-CN.utf8',
             user_agent=FAKE_USER_AGENT,
-            extra_http_headers={'Accept': 'text/html, application/xhtml+xml, application/xml;'}
         )
 
         try:
             page = await context.new_page()
             await stealth_async(page)
-            response = await page.goto(request_url)
+            response = await page.goto(request_url, wait_until='load')
+            await page.wait_for_load_state('load')
             raw_html = await page.content()
             # await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
             return self.response(http=response.status, html=raw_html)
@@ -129,21 +130,18 @@ class PersistentBrowser(object):
             screen={'width': 1280, 'height': 720},
             locale='zh-CN.utf8',
             user_agent=FAKE_USER_AGENT,
-            extra_http_headers={'Accept': 'text/html, application/xhtml+xml, application/xml;'}
         )
 
         try:
             page = await context.new_page()
             await stealth_async(page)
-            response = await page.goto(base_url)
-            await page.wait_for_load_state(state='load')  # "domcontentloaded", "load", "networkidle"
+            response = await page.goto(base_url, wait_until='load') # "domcontentloaded", "load", "networkidle", "commit"
             await page.get_by_role("searchbox").fill(query)
             await page.get_by_role("searchbox").press('Enter')
-            await page.wait_for_load_state(state='load')  # "domcontentloaded", "load", "networkidle"
+            await page.wait_for_load_state('load')
             raw_html = await page.content()
             # await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
-            response = self.response(http=response.status, html=raw_html)
-            return response
+            return self.response(http=response.status, html=raw_html)
 
         finally:
             await context.close()

@@ -4,8 +4,6 @@
 from os import path as os_path
 from sys import version_info
 
-from fake_useragent import UserAgent
-
 # Python version
 PYTHON_VERSION = version_info.major
 

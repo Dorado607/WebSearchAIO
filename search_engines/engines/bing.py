@@ -10,7 +10,7 @@ class Bing(SearchEngine):
 
     def __init__(self, proxy=PROXY, timeout=TIMEOUT):
         super(Bing, self).__init__(proxy, timeout)
-        self._base_url = u'https://www.bing.com/?ensearch=1&FORM=BEHPTB&cc=us'
+        self._base_url = u'https://www.bing.com/'
 
     def _selectors(self, element):
         # 'links': 'ol#b_results > li.b_algo', -> 'links': 'li.b_algo',
@@ -28,7 +28,7 @@ class Bing(SearchEngine):
     def _first_page(self):
         """Returns the initial page and query."""
         # self._get_page(self._base_url)
-        url = u'{}/search?&q={}&form=QBRE'.format(self._base_url, self._query)
+        url = u'{}/search?&q={}&form=QBRE&ensearch=1'.format(self._base_url, self._query)
         return {'url': url, 'data': None, 'base_url':self._base_url, 'query':self._query}
 
     def _next_page(self, tags):

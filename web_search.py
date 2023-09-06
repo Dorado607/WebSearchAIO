@@ -3,6 +3,7 @@
 
 import argparse
 import asyncio
+import logging
 from typing import Any
 
 import aiohttp
@@ -33,25 +34,28 @@ class WSAIO:
 
     async def process_search_result(self, res, session):
         try:
-            extend_snippet = self.goose.extract(url=res["link"])
-            if extend_snippet.title:
-                res["title"] = extend_snippet.title
-            if extend_snippet.cleaned_text:
-                abstract = extend_snippet.cleaned_text
-                abstract = abstract.replace("\n", "")
-                res["snippet"] = abstract
-            return res
+            async with session.get(url=res["link"]) as response:
+                raw_html = await response.text()
+                extend_snippet = self.goose.extract(raw_html=raw_html)
+                if extend_snippet.title:
+                    res["title"] = extend_snippet.title
+                if extend_snippet.cleaned_text:
+                    abstract = extend_snippet.cleaned_text
+                    abstract = abstract.replace("\n", "")
+                    res["snippet"] = abstract
+                return res
         except aiohttp.ClientError as connect_error:
-            print(connect_error)
+            logging.error(connect_error)
 
     @atimer()
-    # 搜索结果增强
+    # search results enhancement
     async def search_result_enhancement(self, search_results):
         async with aiohttp.ClientSession() as session:
-            tasks = [self.process_search_result(res, session) for res in search_results]
-            return await asyncio.gather(*tasks)
+            coroutines = [self.process_search_result(res, session) for res in search_results]
+            enhanced_results = await asyncio.gather(*coroutines)
+            return enhanced_results
 
-    # 异步搜索
+    # async search
     async def asearch(self, query: str, enhance: bool = True):
         search_results = await self.engine.search(query)
         if enhance:

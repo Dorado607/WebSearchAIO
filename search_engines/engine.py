@@ -152,8 +152,8 @@ class SearchEngine(object):
 
         for page in range(1, pages + 1):
             try:
-                response = await self._persistent_browser.search_main_page(request['base_url'], request['query'])
-                # response = await self._get_page(request['url'])
+                # response = await self._persistent_browser.search_main_page(request['base_url'], request['query'])
+                response = await self._get_page(request['url'])
 
                 if not self._is_ok(response):
                     break
