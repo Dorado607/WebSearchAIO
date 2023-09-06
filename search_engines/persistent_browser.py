@@ -52,7 +52,7 @@ class PersistentBrowser(object):
             self.browser = await chromium.launch(
                 channel='msedge',
                 timeout=self.timeout,
-                headless=False,
+                headless=True,
                 proxy={'server': self.proxy} if self.proxy else None,
             )
 
@@ -111,10 +111,10 @@ class PersistentBrowser(object):
         try:
             page = await context.new_page()
             await stealth_async(page)
-            response = await page.goto(request_url, wait_until='load')
-            await page.wait_for_load_state('load')
+            response = await page.goto(request_url)
+            await page.wait_for_selector('#b_results')
             raw_html = await page.content()
-            # await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
+            await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
             return self.response(http=response.status, html=raw_html)
 
         finally:
@@ -135,12 +135,12 @@ class PersistentBrowser(object):
         try:
             page = await context.new_page()
             await stealth_async(page)
-            response = await page.goto(base_url, wait_until='load') # "domcontentloaded", "load", "networkidle", "commit"
+            response = await page.goto(base_url) # "domcontentloaded", "load", "networkidle", "commit"
             await page.get_by_role("searchbox").fill(query)
             await page.get_by_role("searchbox").press('Enter')
-            await page.wait_for_load_state('load')
+            await page.wait_for_selector('#b_results')
             raw_html = await page.content()
-            # await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
+            await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
             return self.response(http=response.status, html=raw_html)
 
         finally:

@@ -4,6 +4,7 @@
 import argparse
 import asyncio
 import logging
+import socket
 from typing import Any
 
 import aiohttp
@@ -23,6 +24,20 @@ from search_engines.engines import *
 
 ua = UserAgent()
 FAKE_USER_AGENT = ua.edge
+
+
+def get_local_ip():
+    """
+    获取本地IP地址
+    """
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(('8.8.8.8', 80))
+            local_ip = s.getsockname()[0]
+            return local_ip
+    except socket.error as e:
+        print("获取本地IP地址时发生错误:", e)
+        return None
 
 
 class WSAIO:
@@ -157,7 +172,7 @@ def api_start(host, port, **kwargs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Web Search Engine All in One')
-    parser.add_argument("--host", type=str, default="127.0.0.1")
+    parser.add_argument("--host", type=str, default=get_local_ip())
     parser.add_argument("--port", type=int, default=1919)
     parser.add_argument("--ssl_keyfile", type=str)
     parser.add_argument("--ssl_certfile", type=str)
