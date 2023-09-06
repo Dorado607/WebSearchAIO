@@ -4,7 +4,6 @@
 import time
 import warnings
 from functools import wraps
-from func_timeout import func_set_timeout
 
 
 def timer(time_limit: float = 5, convey: bool = False):
