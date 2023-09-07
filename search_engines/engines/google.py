@@ -1,11 +1,7 @@
-from fake_useragent import UserAgent
-
 from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT
 from ..utils import unquote_url, quote_url
 
-ua = UserAgent()
-FAKE_USER_AGENT = ua.edge
 
 class Google(SearchEngine):
     """Searches google.com"""
@@ -15,8 +11,7 @@ class Google(SearchEngine):
         self._base_url = 'https://www.google.com'
         self._delay = (2, 6)
         self._current_page = 1
-
-        self.set_headers({'User-Agent': FAKE_USER_AGENT})
+        self.content_selector = '#rcnt'
 
     def _selectors(self, element):
         """Returns the appropriate CSS selector."""

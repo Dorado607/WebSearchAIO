@@ -26,6 +26,7 @@ class SearchEngine(object):
         self._delay = (0.01, 1)
         self._query = ''
         self._filters = []
+        self.content_selector = None
 
         self.results = SearchResults()
         '''The search results.'''
@@ -64,9 +65,9 @@ class SearchEngine(object):
         selector = self._selectors('text')
         return self._get_tag_item(tag.select_one(selector), item)
 
-    def _get_page(self, page: str):
+    def _get_page(self, page: str, content_selector:str):
         """Gets pagination links."""
-        return self._persistent_browser.get_raw_html(page)
+        return self._persistent_browser.get_raw_html(page, content_selector)
 
     def _get_tag_item(self, tag, item):
 
@@ -147,13 +148,15 @@ class SearchEngine(object):
         self._query = decode_bytes(query)
         self.results = SearchResults()
         request = self._first_page()
+
         if self._persistent_browser.browser is None:
             await self._persistent_browser.start()
+        if self.content_selector is None:
+            raise 'Fail to convert content selector'
 
         for page in range(1, pages + 1):
             try:
-                # response = await self._persistent_browser.search_main_page(request['base_url'], request['query'])
-                response = await self._get_page(request['url'])
+                response = await self._get_page(request['url'], self.content_selector)
 
                 if not self._is_ok(response):
                     break

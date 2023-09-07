@@ -1,11 +1,6 @@
-from fake_useragent import UserAgent
-
 from ..engine import SearchEngine
 from ..config import PROXY, TIMEOUT
 from ..utils import unquote_url, quote_url
-
-ua = UserAgent()
-FAKE_USER_AGENT = ua.edge
 
 
 class Duckduckgo(SearchEngine):
@@ -15,7 +10,7 @@ class Duckduckgo(SearchEngine):
         super(Duckduckgo, self).__init__(proxy, timeout)
         self._base_url = u'https://html.duckduckgo.com'
         self._current_page = 1
-        self.set_headers({'User-Agent': FAKE_USER_AGENT})
+        self.content_selector = '#links'
 
     def _selectors(self, element):
         """Returns the appropriate CSS selector."""

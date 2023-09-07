@@ -7,11 +7,14 @@ from sys import version_info
 # Python version
 PYTHON_VERSION = version_info.major
 
+# select a web search engine
+WEB_SEARCH_ENGINE = 'bing'
+
 # Maximum number of pages to search
 SEARCH_ENGINE_RESULTS_PAGES = 1
 
 # Maximum number of results to return
-SEARCH_ENGINE_RESULTS_NUMS = 4
+SEARCH_ENGINE_RESULTS_NUMS = 5
 
 # browser waiting timeout
 TIMEOUT = 30000

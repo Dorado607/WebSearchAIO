@@ -93,7 +93,7 @@ class PersistentBrowser(object):
             return await route.continue_()
 
     @atimer()
-    async def get_raw_html(self, request_url: str) -> namedtuple:
+    async def get_raw_html(self, request_url: str, content_selector:str) -> namedtuple:
         request_url = self._quote(request_url)
 
         if not is_valid_url(request_url):
@@ -112,16 +112,16 @@ class PersistentBrowser(object):
             page = await context.new_page()
             await stealth_async(page)
             response = await page.goto(request_url)
-            await page.wait_for_selector('#b_results')
+            await page.wait_for_selector(content_selector)
             raw_html = await page.content()
-            await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
+            # await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
             return self.response(http=response.status, html=raw_html)
 
         finally:
             await context.close()
 
     @atimer()
-    async def search_main_page(self, base_url: str, query: str) -> namedtuple:
+    async def search_main_page(self, base_url: str, query: str, content_selector:str) -> namedtuple:
         if not self.browser:
             raise RuntimeError("Browser context is not initialized")
 
@@ -138,9 +138,9 @@ class PersistentBrowser(object):
             response = await page.goto(base_url) # "domcontentloaded", "load", "networkidle", "commit"
             await page.get_by_role("searchbox").fill(query)
             await page.get_by_role("searchbox").press('Enter')
-            await page.wait_for_selector('#b_results')
+            await page.wait_for_selector(content_selector)
             raw_html = await page.content()
-            await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
+            # await page.screenshot(path=f'screenshot_{datetime.now().strftime("%Y%m%d%H%M%S")}.png')
             return self.response(http=response.status, html=raw_html)
 
         finally:

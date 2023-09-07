@@ -18,7 +18,7 @@ from goose3.text import StopWordsChinese
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 
-from search_engines.config import OPEN_CROSS_DOMAIN
+from search_engines.config import OPEN_CROSS_DOMAIN, WEB_SEARCH_ENGINE
 from search_engines.decorator import atimer
 from search_engines.engines import *
 
@@ -27,25 +27,33 @@ FAKE_USER_AGENT = ua.edge
 
 
 def get_local_ip():
-    """
-    获取本地IP地址
-    """
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.connect(('8.8.8.8', 80))
             local_ip = s.getsockname()[0]
             return local_ip
     except socket.error as e:
-        print("获取本地IP地址时发生错误:", e)
+        print("Error occurred when getting ip", e)
         return None
 
 
 class WSAIO:
 
     def __init__(self):
+        self.engine = None
         self.loop = None
-        self.engine = Bing()
+        self.select_search_engine()
         self.goose = Goose({"stopwords_class": StopWordsChinese, "browser_user_agent": FAKE_USER_AGENT})
+
+    def select_search_engine(self):
+        match WEB_SEARCH_ENGINE:
+            case 'bing':
+                self.engine = Bing()
+            case 'google':
+                self.engine = Google()
+            case 'duckduckgo':
+                self.engine = Duckduckgo()
+            # add your case here
 
     async def process_search_result(self, res, session):
         try:
@@ -92,7 +100,7 @@ class WSAIO:
                 }]
             )
 
-        self.engine.ignore_duplicate_urls = True  # 避免重复结果
+        self.engine.ignore_duplicate_urls = True  # avoid duplicate url results
         # self.loop = asyncio.get_event_loop()
         # search_results = self.loop.run_until_complete(self.asearch(query))
         search_results = await self.asearch(query)
