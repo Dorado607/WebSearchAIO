@@ -182,7 +182,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Web Search Engine All in One')
     # parser.add_argument("--host", type=str, default=get_local_ip())
     parser.add_argument("--host", type=str, default='127.0.0.1')
-    parser.add_argument("--port", type=int, default=1919)
+    parser.add_argument("--port", type=int, default=7871)
     parser.add_argument("--ssl_keyfile", type=str)
     parser.add_argument("--ssl_certfile", type=str)
 

@@ -166,3 +166,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+flagged/
