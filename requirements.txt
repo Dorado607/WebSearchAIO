@@ -2,7 +2,7 @@ aiohttp==3.8.5
 beautifulsoup4==4.12.2
 fake_useragent==1.2.1
 fastapi==0.103.1
-goose3==3.1.17
+goose3[all]==3.1.17
 playwright==1.37.0
 playwright_stealth==1.0.5
 pydantic==2.3.0
@@ -10,5 +10,5 @@ Requests==2.31.0
 starlette==0.27.0
 uvicorn==0.23.2
 # playwright install chromium
-# playwright install msedge
+# playwright install chrome
 # playwright install-deps

@@ -5,7 +5,6 @@ import asyncio
 import re
 import socket
 from collections import namedtuple
-from datetime import datetime
 
 from fake_useragent import UserAgent
 from playwright.async_api import async_playwright
@@ -16,7 +15,7 @@ from search_engines.decorator import atimer
 from search_engines.utils import *
 
 ua = UserAgent()
-FAKE_USER_AGENT = ua.edge
+FAKE_USER_AGENT = ua.chrome
 
 
 def get_local_ip() -> str | None:
@@ -50,7 +49,7 @@ class PersistentBrowser(object):
             playwright = await async_playwright().start()
             chromium = playwright.chromium
             self.browser = await chromium.launch(
-                channel='msedge',
+                channel='chrome',
                 timeout=self.timeout,
                 headless=True,
                 proxy={'server': self.proxy} if self.proxy else None,

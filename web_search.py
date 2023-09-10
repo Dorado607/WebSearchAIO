@@ -23,7 +23,7 @@ from search_engines.decorator import atimer
 from search_engines.engines import *
 
 ua = UserAgent()
-FAKE_USER_AGENT = ua.edge
+FAKE_USER_AGENT = ua.chrome
 
 
 def get_local_ip():
@@ -43,7 +43,11 @@ class WSAIO:
         self.engine = None
         self.loop = None
         self.select_search_engine()
-        self.goose = Goose({"stopwords_class": StopWordsChinese, "browser_user_agent": FAKE_USER_AGENT})
+        self.goose = Goose(
+            {
+                "stopwords_class": StopWordsChinese, "browser_user_agent": FAKE_USER_AGENT
+            }
+        )
 
     def select_search_engine(self):
         match WEB_SEARCH_ENGINE:
@@ -66,19 +70,21 @@ class WSAIO:
                     abstract = extend_snippet.cleaned_text
                     abstract = abstract.replace("\n", "")
                     res["snippet"] = abstract
-                return res
-        except aiohttp.ClientError as connect_error:
-            logging.error(connect_error)
+        except aiohttp.ClientConnectionError as connect_error:
+            logging.error(f"Connection Error occurred during HTTP request: {connect_error}")
+        except aiohttp.ClientError as other_error:
+            logging.error(f"Client Error occurred during HTTP request: {other_error}")
+        except AttributeError as attr_error:
+            logging.error(f"Attribute Error occurred during requesting a mobile page: {attr_error}")
+        return res
 
-    @atimer()
-    # search results enhancement
+
     async def search_result_enhancement(self, search_results):
         async with aiohttp.ClientSession() as session:
             coroutines = [self.process_search_result(res, session) for res in search_results]
-            enhanced_results = await asyncio.gather(*coroutines)
-            return enhanced_results
+            return await asyncio.gather(*coroutines)
 
-    # async search
+    @atimer()
     async def asearch(self, query: str, enhance: bool = True):
         search_results = await self.engine.search(query)
         if enhance:
@@ -101,10 +107,7 @@ class WSAIO:
             )
 
         self.engine.ignore_duplicate_urls = True  # avoid duplicate url results
-        # self.loop = asyncio.get_event_loop()
-        # search_results = self.loop.run_until_complete(self.asearch(query))
         search_results = await self.asearch(query)
-
 
         if not search_results:
             return ListResultResponse(
@@ -182,7 +185,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Web Search Engine All in One')
     # parser.add_argument("--host", type=str, default=get_local_ip())
     parser.add_argument("--host", type=str, default='127.0.0.1')
-    parser.add_argument("--port", type=int, default=1919)
+    parser.add_argument("--port", type=int, default=7872)
     parser.add_argument("--ssl_keyfile", type=str)
     parser.add_argument("--ssl_certfile", type=str)
 
