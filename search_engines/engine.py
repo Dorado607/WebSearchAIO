@@ -143,48 +143,50 @@ class SearchEngine(object):
             else:
                 self._filters += [operator]
 
-    async def search(self, query, pages=SEARCH_ENGINE_RESULTS_PAGES, result_num=SEARCH_ENGINE_RESULTS_NUMS):
-        console('Searching {}'.format(self.__class__.__name__))
+    async def search(self, query, max_pages=SEARCH_ENGINE_RESULTS_PAGES, max_results=SEARCH_ENGINE_RESULTS_NUMS):
+        console('Searching from {}'.format(self.__class__.__name__))
+
         self._query = decode_bytes(query)
         self.results = SearchResults()
         request = self._first_page()
 
         if self._persistent_browser.browser is None:
             await self._persistent_browser.start()
-        if self.content_selector is None:
-            raise 'Fail to convert content selector'
 
-        for page in range(1, pages + 1):
+        if self.content_selector is None:
+            raise ValueError('Fail to convert content selector')
+
+        for page in range(1, max_pages + 1):
             try:
+                # get raw html from page
                 response = await self._get_page(request['url'], self.content_selector)
 
                 if not self._is_ok(response):
                     break
 
-                tags = BeautifulSoup(response.html, "html.parser")
+                tags = BeautifulSoup(response.html, features='lxml')
                 items = self._filter_results(tags)
                 self._collect_results(items)
 
                 msg = 'page:{:<8} links:{} \n'.format(page, len(self.results))
                 console(msg, end='')
 
-                if len(self.results) >= result_num:
+                reached_result_limit = 0 < max_results <= len(self.results)  # results num limit
+                reached_page_limit = page >= max_pages  # pages num limit
+
+                if reached_result_limit or reached_page_limit:
                     break
 
-                if page < pages:
-                    await asyncio.sleep(random_uniform(*self._delay))
-                    request = self._next_page(tags)
-                    if not request['url']:
-                        break
-                else:
+                await asyncio.sleep(random_uniform(*self._delay))
+                request = self._next_page(tags)
+                if not request['url']:
                     break
 
             except KeyboardInterrupt:
                 break
 
         console('', end='')
-        output_result = [r for r in self.results]
-        return output_result[:result_num] if len(output_result) >= result_num else output_result
+        return self.results[:max_results] if max_results > 0 else self.results
 
     def output(self, output=PRINT, path=None):
         """Prints search results and/or creates report files.

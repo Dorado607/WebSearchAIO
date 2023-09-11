@@ -19,10 +19,10 @@ class Bing(SearchEngine):
         """Returns the appropriate CSS selector."""
         selectors = {
             'url': 'a[href]',
-            'title': 'h3',
-            'text': 'a',
+            'title': 'h2',
+            'text': 'p',
             'links': 'li.b_algo',
-            'next': '#page > div > a.n'
+            'next': 'a.sb_pagN'
         }
         return selectors[element]
 
