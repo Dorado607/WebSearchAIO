@@ -62,7 +62,7 @@ class WSAIO:
     async def process_search_result(self, res, session):
         try:
             async with session.get(url=res["link"]) as response:
-                raw_html = await response.text(encoding='utf-8')
+                raw_html = await response.text(encoding=response.charset)
                 extend_snippet = self.goose.extract(raw_html=raw_html)
                 if extend_snippet.title:
                     res["title"] = extend_snippet.title
@@ -79,6 +79,8 @@ class WSAIO:
             logging.error(f"Attribute Error occurred during requesting a mobile page: {attr_error}")
         except UnicodeDecodeError as decode_error:
             logging.error(f"Decode Error occurred during requesting a page with illegal: {decode_error}")
+        except Exception as e:
+            logging.error(e)
 
         return res
 
@@ -111,6 +113,7 @@ class WSAIO:
             )
 
         self.engine.ignore_duplicate_urls = True  # avoid duplicate url results
+        print(query)
         search_results = await self.asearch(query)
 
         if not search_results:

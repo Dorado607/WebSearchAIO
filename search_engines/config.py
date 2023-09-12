@@ -17,7 +17,7 @@ SEARCH_ENGINE_RESULTS_PAGES = 1
 SEARCH_ENGINE_RESULTS_NUMS = 0
 
 # browser waiting timeout
-TIMEOUT = 30000
+TIMEOUT = 10000
 
 # Proxy server
 PROXY = None
