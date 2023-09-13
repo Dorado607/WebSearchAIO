@@ -80,10 +80,9 @@ class WSAIO:
         except UnicodeDecodeError as decode_error:
             logging.error(f"Decode Error occurred during requesting a page with illegal: {decode_error}")
         except Exception as e:
-            logging.error(e)
+            logging.error(f"Unexceptional error occurred: {e}")
 
         return res
-
 
     async def search_result_enhancement(self, search_results):
         async with aiohttp.ClientSession() as session:
