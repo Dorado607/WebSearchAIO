@@ -14,10 +14,10 @@ WEB_SEARCH_ENGINE = 'bing'
 SEARCH_ENGINE_RESULTS_PAGES = 1
 
 # Maximum number of results to return
-SEARCH_ENGINE_RESULTS_NUMS = 5
+SEARCH_ENGINE_RESULTS_NUMS = 0
 
 # browser waiting timeout
-TIMEOUT = 30000
+TIMEOUT = 10000
 
 # Proxy server
 PROXY = None

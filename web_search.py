@@ -62,7 +62,7 @@ class WSAIO:
     async def process_search_result(self, res, session):
         try:
             async with session.get(url=res["link"]) as response:
-                raw_html = await response.text()
+                raw_html = await response.text(encoding=response.charset)
                 extend_snippet = self.goose.extract(raw_html=raw_html)
                 if extend_snippet.title:
                     res["title"] = extend_snippet.title
@@ -70,14 +70,19 @@ class WSAIO:
                     abstract = extend_snippet.cleaned_text
                     abstract = abstract.replace("\n", "")
                     res["snippet"] = abstract
+
         except aiohttp.ClientConnectionError as connect_error:
             logging.error(f"Connection Error occurred during HTTP request: {connect_error}")
         except aiohttp.ClientError as other_error:
             logging.error(f"Client Error occurred during HTTP request: {other_error}")
         except AttributeError as attr_error:
             logging.error(f"Attribute Error occurred during requesting a mobile page: {attr_error}")
-        return res
+        except UnicodeDecodeError as decode_error:
+            logging.error(f"Decode Error occurred during requesting a page with illegal: {decode_error}")
+        except Exception as e:
+            logging.error(f"Unexceptional error occurred: {e}")
 
+        return res
 
     async def search_result_enhancement(self, search_results):
         async with aiohttp.ClientSession() as session:
@@ -107,6 +112,7 @@ class WSAIO:
             )
 
         self.engine.ignore_duplicate_urls = True  # avoid duplicate url results
+        print(query)
         search_results = await self.asearch(query)
 
         if not search_results:
