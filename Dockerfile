@@ -11,6 +11,7 @@ RUN mkdir -p /home/WebSearchAIO
 WORKDIR /home
 COPY requirements.txt /home/requirements.txt
 RUN pip install -r requirements.txt -i https://mirrors.cloud.tencent.com/pypi/simple
+RUN playwright install chrome
 # 拷贝代码
 WORKDIR /home/WebSearchAIO
 COPY . /home/WebSearchAIO
